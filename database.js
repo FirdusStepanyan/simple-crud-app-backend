@@ -1,15 +1,19 @@
-const { Client } = require("pg");
+import { DataSource } from "typeorm";
+import User from "./models/user.model.js"; 
+import Product from "./models/product.model.js";
 
-const con = new Client({
-    host: "localhost",
-    user: "postgres",
-    port: 5432,
-    password: "Stepanyan1@",  
-    database: "edo"
+const AppDataSource = new DataSource({
+  type: "postgres",
+  host: "localhost",
+  username: "postgres",
+  port: 5432,
+  password: "Stepanyan1@",
+  database: "edo",
+  synchronize: false,
+  logging: true,
+  entities: [User, Product],
+  migrations: [],
+  subscribers: [],
 });
 
-con.connect()
-    .then(() => console.log("PostgreSQL Connected"))
-    .catch(err => console.error("PostgreSQL Connection Error:", err));
-
-module.exports = con;  
+export default AppDataSource;

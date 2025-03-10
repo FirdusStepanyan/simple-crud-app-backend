@@ -1,100 +1,132 @@
-const Product = require("../models/product.model.js");
-const con = require("../database");
+import AppDataSource from "../database.js";
 
-const getProducts = async (req, res) => {
-    try {
-        const insertQuery = 'SELECT * FROM public.product';
-        const products = await con.query(insertQuery);
-        res.status(200).json(products.rows);
-    } catch (error) {
-        res.status(500).json({ message: error, message });
-    }
-};
+import Product from "../models/product.model.js";
+import User from "../models/user.model.js";
 
-const getProduct = async (req, res) => {
+
+export const getProducts = async (req, res) => {
     try {
-        const { id } = req.params;
-        const insertQuery = 'SELECT * FROM public.product WHERE id = $1';
-        const product = await con.query(insertQuery,[id]);
-        res.status(200).json(product.rows[0]);
+        if (!AppDataSource.isInitialized) {
+            await AppDataSource.initialize();
+        }
+
+        const productRepository = AppDataSource.getRepository(Product);
+        const products = await productRepository.find();
+
+        res.status(200).json(products);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
 
-
-
-const createProduct = async (req, res) => {
+export const getProduct = async (req, res) => {
     try {
-        const {name, quantity, price } = req.body;
-        const insertQuery = 'INSERT INTO product ( name, quantity, price) VALUES ($1, $2, $3) RETURNING *';
-        const result = await con.query(insertQuery, [name, quantity, price]);
+        if (!AppDataSource.isInitialized) {
+            await AppDataSource.initialize();
+        }
 
-        res.status(201).json(result.rows[0]);
-
-    } catch (error) {
-        console.error("PostgreSQL Error:", error);
-        res.status(500).json({ message: error.message });
-    }
-};
-
-
-const updateProduct = async (req, res) => {
-    try {
+        const productRepository = AppDataSource.getRepository(Product);
         const { id } = req.params;
-        const { name, quantity, price } = req.body; 
 
-        const checkQuery = 'SELECT * FROM public.product WHERE id = $1';
-        const checkResult = await con.query(checkQuery, [id]);
+        const product = await productRepository.findOneBy({ id: Number(id) });
 
-        if (checkResult.rows.length === 0) {
+        if (!product) {
             return res.status(404).json({ message: "Product not found" });
         }
 
-        const updateQuery = 
-            `UPDATE public.product 
-            SET name = $1, quantity = $2, price = $3 
-            WHERE id = $4 
-            RETURNING *`;
-
-        const result = await con.query(updateQuery, [name, quantity, price, id]);
-
-        res.status(200).json(result.rows[0]);
-
+        res.status(200).json(product);
     } catch (error) {
-        console.error("PostgreSQL Error:", error);
+        console.log("Error:", error);
         res.status(500).json({ message: error.message });
     }
 };
 
-
-const deleteProduct = async (req, res) => {
+export const createProduct = async (req, res) => {
     try {
-        const { id } = req.params;
-        const checkQuery = 'SELECT * FROM public.product WHERE id = $1';
-        const checkResult = await con.query(checkQuery, [id]);
+        const { name, quantity, price, userId } = req.body;
 
-        if (checkResult.rows.length === 0) {
+        if (!name || !quantity || !price || !userId) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+
+        const userRepository = AppDataSource.getRepository(User);
+        const user = await userRepository.findOne({ where: { id: userId } });
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const productRepository = AppDataSource.getRepository(Product);
+        const newProduct = productRepository.create({
+            name,
+            quantity,
+            price,
+            user,
+        });
+
+        await productRepository.save(newProduct);
+        return res.status(201).json({
+            id: newProduct.id,
+            name: newProduct.name,
+            quantity: newProduct.quantity,
+            price: newProduct.price,
+            userId: user.id,
+        });
+    } catch (error) {
+        console.error("Error creating product:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+export const updateProduct = async (req, res) => {
+    try {
+        if (!AppDataSource.isInitialized) {
+            await AppDataSource.initialize();
+        }
+
+        const productRepository = AppDataSource.getRepository(Product);
+        const { id } = req.params;
+        const { name, quantity, price, userId} = req.body;
+
+        const product = await productRepository.findOneBy({ id: Number(id) });
+
+        if (!product) {
             return res.status(404).json({ message: "Product not found" });
         }
-        const deleteQuery = 'DELETE FROM public.product WHERE id = $1 RETURNING *';
 
-        const result = await con.query(deleteQuery, [id]);
+        product.name = name;
+        product.quantity = quantity;
+        product.price = price;
+        product.userId = userId;
 
-        if (result.rows.length > 0) {
-            res.status(200).json({ message: `Product with id ${id} deleted successfully` });
-        } else {
-            res.status(400).json({ message: "Failed to delete product" });
-        }
+        const updateProduct = await productRepository.save(product);
+
+        res.status(200).json(updateProduct);
     } catch (error) {
-        console.error("PostgreSQL Error:", error);
+        console.error("TypeORM Error:", error);
         res.status(500).json({ message: error.message });
     }
 };
-module.exports = {
-    getProducts,
-    getProduct,
-    createProduct,
-    updateProduct,
-    deleteProduct
+
+export const deleteProduct = async (req, res) => {
+    try {
+        if (!AppDataSource.isInitialized) {
+            await AppDataSource.initialize();
+        }
+
+        const productRepository = AppDataSource.getRepository(Product);
+        const { id } = req.params;
+        const product = await productRepository.findOneBy({ id: Number(id) });
+
+        if (!product) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        await productRepository.delete(id);
+
+        res.status(200).json({ message: "Product deleted successfully" });
+    } catch (error) {
+        console.error("TypeORM Error:", error);
+        res.status(500).json({ message: error.message });
+    }
 };

@@ -10,14 +10,16 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "description": "",
   "devDependencies": {
     "nodemon": "^3.1.9"
   },
   "dependencies": {
     "express": "^4.21.2",
-    "mongodb": "^6.13.0",
-    "mongoose": "^8.10.0"
+    "mongodb": "^5.8.0",
+    "mongoose": "^8.10.0",
+    "pg": "^8.13.3",
+    "typeorm": "^0.3.21"
   }
 }

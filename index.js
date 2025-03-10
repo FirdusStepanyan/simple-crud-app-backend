@@ -1,12 +1,8 @@
-const express = require("express")
-const Product = require('./models/product.model.js');
-const productRoute = require("./routes/product.route.js");
-const User = require('./models/user.model.js');
-const userRoute = require("./routes/user.route.js");
+import express from "express";
+import productRoute from "./routes/product.route.js";
+import userRoute from "./routes/user.route.js";
 
-const app = express()
-
-
+const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -14,13 +10,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use("/api/products", productRoute);
 app.use("/api/users", userRoute);
 
-app.get('/', (req, res) => {
+app.get("/", (req, res) => {
     res.send("hello");
 });
 
-        app.listen(3000, () => {
-            console.log("hi")
-        });
-
-const con = require("./database.js");
-
+app.listen(3000, () => {
+    console.log("Server running on port 3000");
+});

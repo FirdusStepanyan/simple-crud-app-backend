@@ -1,45 +1,36 @@
- //const mongoose = require('mongoose');
+import { EntitySchema } from "typeorm";
 
-// const ProductSchema = mongoose.Schema(
-//         {
+const Product = new EntitySchema({
+    name: "Product",
+    tableName: "public.products",
+    columns: {
+        id: {
+            primary: true,
+            type: "int",
+            generated: true,
+        },
+        name: {
+            type: "varchar",
+            length: 100,
+            nullable: false,
+        },
+        quantity: {
+            type: "int",
+            nullable: false,
+        },
+        price: {
+            type: "int",
+            nullable: false,
+        },
+    },
+    relations: {
+        user: {
+            type: "many-to-one",
+            target: "User",
+            joinColumn: true,
+            nullable: false,
+        },
+    },
+});
 
-//         name:{
-//             type: String,
-//             required:[true, "please enter product name"],
-//         },
-//         quantity:{
-//             type: Number,
-//             required: true,
-//             default: 0
-//         },
-//         price:{
-//             type: Number,
-//             required: true,
-//             default: 0
-//         },
-//         image:{
-//             type: String,
-//             required: false
-//         },
-
-//     },
-//     {
-//         timestamps: true
-//     }
-// );
-
-
-
-//const mongoose = require("mongoose");
-
-// const productSchema = new mongoose.Schema({
-//     name: { type: String, required: true },
-//     quantity: { type: Number, required: true },  // ✅ Ensure quantity is defined
-//     price: { type: Number, required: true }
-// });
-
-// module.exports = mongoose.model("product", productSchema);
-
-//const Product = mongoose.model("product", ProductSchema);
-
-//module.exports = Product;
+export default Product;
