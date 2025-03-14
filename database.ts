@@ -1,6 +1,6 @@
 import { DataSource } from "typeorm";
-import User from "./models/user.model.js"; 
-import Product from "./models/product.model.js";
+import UserSchema from "./models/user.model";
+import ProductSchema from "./models/product.model";
 
 const AppDataSource = new DataSource({
   type: "postgres",
@@ -11,7 +11,7 @@ const AppDataSource = new DataSource({
   database: "edo",
   synchronize: false,
   logging: true,
-  entities: [User, Product],
+  entities: [UserSchema,ProductSchema],
   migrations: [],
   subscribers: [],
 });
