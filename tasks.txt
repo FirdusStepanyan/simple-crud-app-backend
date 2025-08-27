@@ -1,0 +1,15 @@
+08/25-26
+1)  product create update validation
+user create update validation
+user create poxel registrcia (anun.path) (email, pass) email unique
+login enpoint
+
+08/26
+1 hat admin,
+Rolerri logikla (user, admin)
+
+adminy kara userneri get ani, usery chi kara
+prodti gety admini depqum sax piti ta, isk useri depqum menak irany
+
+
+producti ordering, asc  desc (idov)
