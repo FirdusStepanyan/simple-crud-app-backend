@@ -1,43 +1,30 @@
-// import express from "express";
-// import productRoute from "./routes/product.route.ts";
-// import userRoute from "./routes/user.route.ts";
-
-// const app = express();
-
-// app.use(express.json());
-// app.use(express.urlencoded({ extended: false }));
-
-// app.use("/api/products", productRoute);
-// app.use("/api/users", userRoute);
-
-// app.get("/", (req, res) => {
-//     res.send("hello");
-// });
-
-// app.listen(3000, () => {
-//     console.log("Server running on port 3000");
-// });
-
 import express, { Request, Response } from "express";
-import productRoute from "./routes/product.route";
-import userRoute from "./routes/user.route";
+import AppDataSource from "./src/database";
+import productRoute from "./src/routes/product.route";
+import userRoute from "./src/routes/user.route";
+import authRoute from "./src/routes/auth.route";
 
 const app = express();
-
-// Middleware to parse JSON and URL-encoded data
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Use routes
+// Routes
 app.use("/api/products", productRoute);
 app.use("/api/users", userRoute);
+app.use("/api/auth", authRoute);
 
-// A simple test route
-app.get("/", (req: Request, res: Response): void => {
-    res.send("hello");
+app.get("/", (req: Request, res: Response) => {
+  res.send("hello");
 });
 
-// Start the server
-app.listen(3000, (): void => {
-    console.log("Server running on port 3000");
-});
+// Start server after DB init
+AppDataSource.initialize()
+  .then(() => {
+    console.log("✅ Data Source has been initialized!");
+    app.listen(3000, () => {
+      console.log("🚀 Server running on port 3000");
+    });
+  })
+  .catch((err) => {
+    console.error("❌ Error during Data Source initialization:", err);
+  });
