@@ -63,6 +63,19 @@ export const getUser = async (req: Request, res: Response): Promise<void> => {
 };
 
 
+
+export const getProfile = async (req: Request, res: Response): Promise<void> => {
+  try {
+    // todo shatunakel
+    // hushum, piti ogtagorcvi login exaci infon
+    res.status(200).json(true);
+  } catch (error: unknown) {
+    console.error("Error:", error);
+    res.status(500).json({ message: error instanceof Error ? error.message : "Unknown error" });
+  }
+};
+
+
 export const updateUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const userRepository = AppDataSource.getRepository(User);

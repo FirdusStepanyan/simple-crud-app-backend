@@ -4,7 +4,7 @@ import { USER_ROLES } from "../roles";
 import { AuthRequest } from "../types/auth";
 
 
-export const validateUser = (req: AuthRequest, res: Response, next: NextFunction): void => {
+export const adminMiddleware = (req: AuthRequest, res: Response, next: NextFunction): void => {
 
     if (req.user?.role !== USER_ROLES.ADMIN) {
         res.status(403).json({ message: "Forbidden: Only admins can access users" });
