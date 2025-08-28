@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 
-// Validate User create/update
 export const validateUser = (req: Request, res: Response, next: NextFunction): void => {
     const { name, lastname, age } = req.body;
 
@@ -19,10 +18,9 @@ export const validateUser = (req: Request, res: Response, next: NextFunction): v
         return;
     }
 
-    next(); // everything is fine, move to next middleware/controller
+    next();
 };
 
-// Validate Product create/update
 export const validateProduct = (req: Request, res: Response, next: NextFunction): void => {
     const { name, quantity, price} = req.body;
 
@@ -46,28 +44,39 @@ export const validateProduct = (req: Request, res: Response, next: NextFunction)
         return;
     }
 
-    next(); // everything is fine, move to next middleware/controller
+    next();
 };
-
-// Validate Product create/update
 
 
 export const loginUser = (req: Request, res: Response, next: NextFunction): void => {
   const { email, password } = req.body;
 
-  // Check if email or password is missing
   if (!email || !password) {
     res.status(400).json({ message: "Email and password are required" });
     return;
   }
 
-  // Optional: validate email format
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     res.status(400).json({ message: "Invalid email format" });
     return;
   }
 
-  next(); // All good, pass control to the login controller
+  next();
 };
 
+export const validateverificode = (req: Request, res: Response, next: NextFunction): void => {
+  const { code } = req.body;
+
+  if (code == null || code == undefined) {
+    res.status(400).json({ message: "code is required" });
+    return;
+  }
+   
+  if(typeof code !== "number"){
+    res.status(400).json({ message: "code is string, write number" });
+    return;
+  }
+
+  next();
+};

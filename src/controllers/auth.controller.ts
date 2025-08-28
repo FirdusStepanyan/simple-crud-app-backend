@@ -1,55 +1,56 @@
 import { Request, Response } from "express";
 import AppDataSource from "../database";
-import User from "../models/user.model";
+import UserSchema, { User } from "../models/user.model";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import UserSchema from "../models/user.model";
 import { JWTPayloadType } from "../types/JWTPayloadType";
+import { AuthRequest } from "../types/auth";
 
-// User registration
 export const registration = async (req: Request, res: Response): Promise<void> => {
   try {
     const { name, lastname, age, email, password } = req.body;
+    const userRepository = AppDataSource.getRepository(UserSchema);
 
-    const userRepository = AppDataSource.getRepository(User);
-
-    // Check if email already exists
     const existingUser = await userRepository.findOne({ where: { email } });
     if (existingUser) {
       res.status(409).json({ message: "Email already registered" });
       return;
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
+    const verificationCode = Math.floor(1000 + Math.random() * 9000); // 4 digit code
 
-    // Create user
     const user = userRepository.create({
       name,
       lastname,
       age,
       email,
       password: hashedPassword,
+      email_verifi_code: verificationCode,
+      is_verified: false,
     });
 
     const result = await userRepository.save(user);
 
-    // Don't return password in response
-    const { password: _, ...userWithoutPassword } = result;
+    const { password: _, email_verifi_code, ...userWithoutPassword } = result;
 
-    res.status(201).json(userWithoutPassword);
+    console.log("Verification code for", email, "=>", verificationCode);
+
+    res.status(201).json({
+      message: "User registered. Please verify your email.",
+      user: userWithoutPassword,
+    });
   } catch (error: unknown) {
     console.error("Error:", error);
-    res.status(500).json({ message: error instanceof Error ? error.message : "Unknown error" });
+    res.status(500).json({
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 };
 
-
-// Create user
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
-
     const userRepository = AppDataSource.getRepository(UserSchema);
     const user = await userRepository.findOne({ where: { email } });
 
@@ -58,35 +59,52 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // check password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       res.status(401).json({ message: "Invalid email or password" });
       return;
     }
 
-    let payload: JWTPayloadType = { id: user.id, email: user.email };
-    // generate JWT
-    const token = jwt.sign(
-      payload,
-      process.env.JWT_SECRET || "supersecret", // use env var in prod
-      { expiresIn: "1h" }
-    );
-
-    // ✅ return only name + lastname + token
-    res.json({
-      message: "Login successful",
-      user: {
-        id: user.id,
-        name: user.name,
-        lastname: user.lastname,
-      },
-      token,
+    const payload: JWTPayloadType = { id: user.id, email: user.email };
+    const token = jwt.sign(payload, process.env.JWT_SECRET || "supersecret", {
+      expiresIn: "1h",
     });
 
-    
+    res.json({
+      message: "Login successful",
+      user: { id: user.id, name: user.name, lastname: user.lastname },
+      token,
+    });
   } catch (error: unknown) {
     console.error("Login Error:", error);
-    res.status(500).json({ message: error instanceof Error ? error.message : "Unknown error" });
+    res.status(500).json({
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
+export const emailverifi = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { code } = req.body;
+    const userRepository = AppDataSource.getRepository(UserSchema);
+    const user: any = req?.user;
+    console.log(user.email_verifi_code);
+    console.log(Number(code));
+
+    if (user.email_verifi_code !== Number(code)) {
+      res.status(400).json({ message: "Invalid verification code" });
+      return;
+    }
+
+    user.is_verified = true;
+    user.email_verifi_code = null;
+    await userRepository.save(user);
+
+    res.json({ message: "Email successfully verified" });
+  } catch (error: unknown) {
+    console.error("verifi Error:", error);
+    res.status(500).json({
+      message: error instanceof Error ? error.message : "verification failed",
+    });
   }
 };

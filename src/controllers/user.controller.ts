@@ -1,23 +1,46 @@
 import { Request, Response } from "express";
 import AppDataSource from "../database";
 import User from "../models/user.model";
+import { USER_ROLES } from "../roles";
+import { AuthRequest } from "../types/auth";
 
-// Get all users (with products relation)
-export const getUsers = async (req: Request, res: Response): Promise<void> => {
+
+export const getUsers = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    if (!req.user?.id || !req.user?.role) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
     const userRepository = AppDataSource.getRepository(User);
-    const users = await userRepository.find({
+
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 3;
+    const skip = (page - 1) * limit;
+
+    const [users, total] = await userRepository.findAndCount({
       relations: ["products"],
+      skip,
+      take: limit,
     });
-    
-    res.status(200).json(users);
+
+    const totalPages = Math.ceil(total / limit);
+
+    res.status(200).json({
+      page,
+      totalPages,
+      totalItems: total,
+      itemsPerPage: limit,
+      users,
+    });
   } catch (error: unknown) {
     console.error("Error:", error);
     res.status(500).json({ message: error instanceof Error ? error.message : "Unknown error" });
   }
 };
 
-// Get single user by ID
+
+
 export const getUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const userRepository = AppDataSource.getRepository(User);
@@ -40,7 +63,6 @@ export const getUser = async (req: Request, res: Response): Promise<void> => {
 };
 
 
-// Update user
 export const updateUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const userRepository = AppDataSource.getRepository(User);
@@ -71,7 +93,7 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-// Delete user
+
 export const deleteUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const userRepository = AppDataSource.getRepository(User);

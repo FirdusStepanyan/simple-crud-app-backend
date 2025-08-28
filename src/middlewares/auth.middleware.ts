@@ -5,17 +5,15 @@ import User from "../models/user.model";
 import { JWTPayloadType } from "../types/JWTPayloadType";
 
 
-// Middleware to check JWT token
 export const authenticate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  // Get token from Authorization header
+
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
     res.status(401).json({ message: "Authorization header missing" });
     return;
   }
-
-  // Format: "Bearer <token>"
+ 
   const token = authHeader.split(" ")[1];
   if (!token) {
     res.status(401).json({ message: "Token missing" });

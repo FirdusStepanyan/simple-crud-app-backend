@@ -8,7 +8,6 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Routes
 app.use("/api/products", productRoute);
 app.use("/api/users", userRoute);
 app.use("/api/auth", authRoute);
@@ -17,7 +16,6 @@ app.get("/", (req: Request, res: Response) => {
   res.send("hello");
 });
 
-// Start server after DB init
 AppDataSource.initialize()
   .then(() => {
     console.log("✅ Data Source has been initialized!");
