@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import AppDataSource from "../database";
 import User from "../models/user.model";
-import { USER_ROLES } from "../roles";
 import { AuthRequest } from "../types/auth";
+import { sendVerificationEmail } from "./notification.controller";
 
 
 export const getUsers = async (req: AuthRequest, res: Response): Promise<void> => {
@@ -39,8 +39,6 @@ export const getUsers = async (req: AuthRequest, res: Response): Promise<void> =
   }
 };
 
-
-
 export const getUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const userRepository = AppDataSource.getRepository(User);
@@ -72,7 +70,7 @@ export const getProfile = async (req: AuthRequest, res: Response): Promise<void>
     const userRepository = AppDataSource.getRepository(User);
     const user = await userRepository.findOne({
       where: { id: req.user.id },
-      relations: ["products"], // եթե պետք ա նաև կապված տվյալները
+      relations: ["products"],
     });
 
     if (!user) {
@@ -80,44 +78,53 @@ export const getProfile = async (req: AuthRequest, res: Response): Promise<void>
       return;
     }
 
-    res.status(200).json(user);
+    const { password, email_verifi_code, ...userWithoutSensitive } = user;
+
+    res.status(200).json(userWithoutSensitive);
   } catch (error: unknown) {
     console.error("Error:", error);
     res.status(500).json({ message: error instanceof Error ? error.message : "Unknown error" });
   }
 };
 
-
-
-export const updateUser = async (req: Request, res: Response): Promise<void> => {
+export const updateProfile = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userRepository = AppDataSource.getRepository(User);
-    const { id } = req.params;
     const { name, lastname, age, email } = req.body;
 
-    const user = await userRepository.findOneBy({ id: Number(id) });
+    const user = req.user as any;
 
-    if (!user) {
-      res.status(404).json({ message: "User not found" });
-      return;
+    let email_updated = false;
+    let verificationCode
+  
+    if (email && email !== user.email) {
+      verificationCode = Math.floor(1000 + Math.random() * 9000);
+      user.email = email;
+      user.email_verifi_code = verificationCode;
+      user.is_verified = false;
+
+      email_updated = true
+      console.log(`Verification code sent to ${email}: ${verificationCode}`);
     }
 
-    if (!email) {
-      res.status(404).json({ message: "User not found" });
-      return;
-    }
-    user.name = name;
-    user.lastname = lastname;
-    user.age = age;
-    user.email = email;
+    if (name) user.name = name;
+    if (lastname) user.lastname = lastname;
+    if (age) user.age = age;
 
     const updatedUser = await userRepository.save(user);
-    res.status(200).json(updatedUser);
+    if (email_updated && verificationCode) {
+      await sendVerificationEmail(email, verificationCode);
+    }
+    const { password, email_verifi_code, ...mnacakeyer } = updatedUser;
+console.log(mnacakeyer);
+
+    res.status(200).json({ message: "User updated", user: mnacakeyer });
   } catch (error: unknown) {
     console.error("Error:", error);
     res.status(500).json({ message: error instanceof Error ? error.message : "Unknown error" });
   }
 };
+
 
 
 export const deleteUser = async (req: Request, res: Response): Promise<void> => {
