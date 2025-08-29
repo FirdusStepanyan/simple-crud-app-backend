@@ -3,6 +3,8 @@ import AppDataSource from "../database";
 import User from "../models/user.model";
 import { AuthRequest } from "../types/auth";
 import { sendVerificationEmail } from "./notification.controller";
+import bcrypt from "bcrypt";
+
 
 
 export const getUsers = async (req: AuthRequest, res: Response): Promise<void> => {
@@ -125,6 +127,52 @@ console.log(mnacakeyer);
   }
 };
 
+
+export const updatePassword = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userRepository = AppDataSource.getRepository(User);
+    const { currentPassword, newPassword, confirmNewPassword } = req.body;
+
+    if (!req.user) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+      res.status(400).json({ message: "All fields are required" });
+      return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      res.status(400).json({ message: "New passwords do not match" });
+      return;
+    }
+
+    const user = await userRepository.findOneBy({ id: req.user.id });
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    // Ստուգել հին password-ը
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      res.status(400).json({ message: "Current password is incorrect" });
+      return;
+    }
+
+    // Hash անել նոր password-ը
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+
+    await userRepository.save(user);
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error: unknown) {
+    console.error("Error:", error);
+    res.status(500).json({ message: error instanceof Error ? error.message : "Unknown error" });
+  }
+};
 
 
 export const deleteUser = async (req: Request, res: Response): Promise<void> => {

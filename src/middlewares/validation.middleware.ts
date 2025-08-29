@@ -80,3 +80,26 @@ export const validateverificode = (req: Request, res: Response, next: NextFuncti
 
   next();
 };
+
+
+
+export const validateUpdatePassword = (req: Request, res: Response, next: NextFunction): void => {
+    const { currentPassword, newPassword, confirmNewPassword } = req.body;
+
+    if (!currentPassword || !newPassword || confirmNewPassword === undefined) {
+        res.status(400).json({ message: "Name, lastname, and age are required" });
+        return;
+    }
+
+    // if (typeof name !== "string" || typeof lastname !== "string") {
+    //     res.status(400).json({ message: "Name and lastname must be strings" });
+    //     return;
+    // }
+
+    // if (typeof age !== "number" || age <= 0) {
+    //     res.status(400).json({ message: "Age must be a positive number" });
+    //     return;
+    // }
+
+    next();
+};

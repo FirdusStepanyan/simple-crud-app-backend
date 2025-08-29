@@ -30,9 +30,9 @@ usernerin karan get anen menak adminy
  
 takinnery linumen update profile endpointum
 
-2) mail sendgrid, registracia lineluc mail gna, text(Wlocome my project, ypur verification code is "5445")
+2) mail sendgrid, registracia lineluc mail gna, text(Wlocome my project, ypur verification code is "5445") +
 3) login exac vichakum, update user enpodintum, toxel vor emailnel update ani, ete taza maila grel noric uxarkel mail ev email verify false sarqel
-    update email mail
+    update email mail  +
 4) login exac vichakum, update password endpotint
 5) taza endpoint upload profile image, ogtagorcelues packijner (path, fs)
     path(src/uploads/Date now().jpeg)
