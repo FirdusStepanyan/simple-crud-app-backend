@@ -1,105 +1,143 @@
 import { Request, Response, NextFunction } from "express";
+import Joi from "joi";
 
-export const validateUser = (req: Request, res: Response, next: NextFunction): void => {
-    const { name, lastname, age } = req.body;
+// -------------------- User validation --------------------
+export const updateUser = (req: Request, res: Response, next: NextFunction): void => {
+  const schema = Joi.object({
+    name: Joi.string().min(2).max(50).required().messages({
+      "any.required": "Name is required",
+      "string.empty": "Name cannot be empty",
+    }),
+    lastname: Joi.string().min(2).max(50).required().messages({
+      "any.required": "Lastname is required",
+      "string.empty": "Lastname cannot be empty",
+    }),
+    email: Joi.string().max(50).required().messages({
+      "any.required": "Email is required",
+      "string.empty": "Email cannot be empty",
+    }),
+    age: Joi.number().integer().positive().required().messages({
+      "any.required": "Age is required",
+      "number.base": "Age must be a number",
+      "number.positive": "Age must be positive",
+    }),
+  });
 
-    if (!name || !lastname || age === undefined) {
-        res.status(400).json({ message: "Name, lastname, and age are required" });
-        return;
-    }
+  const { error } = schema.validate(req.body, { abortEarly: false });
+  if (error) {
+    res.status(400).json({ message: error.details.map(d => d.message).join(", ") });
+    return;
+  }
 
-    if (typeof name !== "string" || typeof lastname !== "string") {
-        res.status(400).json({ message: "Name and lastname must be strings" });
-        return;
-    }
+  next();
+};
 
-    if (typeof age !== "number" || age <= 0) {
-        res.status(400).json({ message: "Age must be a positive number" });
-        return;
-    }
 
-    next();
+// -------------------- User validation --------------------
+export const registerUser = (req: Request, res: Response, next: NextFunction): void => {
+  const schema = Joi.object({
+    name: Joi.string().min(2).max(50).required().messages({
+      "any.required": "Name is required",
+      "string.empty": "Name cannot be empty",
+    }),
+    lastname: Joi.string().min(2).max(50).required().messages({
+      "any.required": "Lastname is required",
+      "string.empty": "Lastname cannot be empty",
+    }),
+    email: Joi.string().max(50).required().messages({
+      "any.required": "Email is required",
+      "string.empty": "Email cannot be empty",
+    }),
+    password: Joi.string().max(50).required().messages({
+      "any.required": "Password is required",
+      "string.empty": "Password cannot be empty",
+    }),
+    age: Joi.number().integer().positive().required().messages({
+      "any.required": "Age is required",
+      "number.base": "Age must be a number",
+      "number.positive": "Age must be positive",
+    }),
+  });
+
+  const { error } = schema.validate(req.body, { abortEarly: false });
+  if (error) {
+    res.status(400).json({ message: error.details.map(d => d.message).join(", ") });
+    return;
+  }
+
+  next();
 };
 
 export const validateProduct = (req: Request, res: Response, next: NextFunction): void => {
-    const { name, quantity, price} = req.body;
+  const schema = Joi.object({
+    name: Joi.string().min(2).max(100).required(),
+    quantity: Joi.number().integer().min(0).required(),
+    price: Joi.number().min(0).required(),
+  });
 
-    if (!name || quantity === undefined || price === undefined) {
-        res.status(400).json({ message: "All fields are required" });
-        return;
-    }
+  const { error } = schema.validate(req.body, { abortEarly: false });
+  if (error) {
+    res.status(400).json({ message: error.details.map(d => d.message).join(", ") });
+    return;
+  }
 
-    if (typeof name !== "string") {
-        res.status(400).json({ message: "Name must be a string" });
-        return;
-    }
-
-    if (typeof quantity !== "number" || quantity < 0) {
-        res.status(400).json({ message: "Quantity must be a non-negative number" });
-        return;
-    }
-
-    if (typeof price !== "number" || price < 0) {
-        res.status(400).json({ message: "Price must be a non-negative number" });
-        return;
-    }
-
-    next();
+  next();
 };
-
 
 export const loginUser = (req: Request, res: Response, next: NextFunction): void => {
-  const { email, password } = req.body;
+  const schema = Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().min(6).max(128).required(),
+  });
 
-  if (!email || !password) {
-    res.status(400).json({ message: "Email and password are required" });
-    return;
-  }
-
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    res.status(400).json({ message: "Invalid email format" });
-    return;
-  }
-
-  next();
-};
-
-export const validateverificode = (req: Request, res: Response, next: NextFunction): void => {
-  const { code } = req.body;
-
-  if (code == null || code == undefined) {
-    res.status(400).json({ message: "code is required" });
-    return;
-  }
-   
-  if(typeof code !== "number"){
-    res.status(400).json({ message: "code is string, write number" });
+  const { error } = schema.validate(req.body, { abortEarly: false });
+  if (error) {
+    res.status(400).json({ message: error.details.map(d => d.message).join(", ") });
     return;
   }
 
   next();
 };
 
+export const validateVerifiCode = (req: Request, res: Response, next: NextFunction): void => {
+  const schema = Joi.object({
+    code: Joi.number().required().messages({
+      "any.required": "Verification code is required",
+      "number.base": "Verification code must be a number",
+    }),
+  });
 
+  const { error } = schema.validate(req.body, { abortEarly: false });
+  if (error) {
+    res.status(400).json({ message: error.details.map(d => d.message).join(", ") });
+    return;
+  }
+
+  next();
+};
 
 export const validateUpdatePassword = (req: Request, res: Response, next: NextFunction): void => {
-    const { currentPassword, newPassword, confirmNewPassword } = req.body;
+  const schema = Joi.object({
+    currentPassword: Joi.string().required().messages({
+      "any.required": "Current password is required",
+      "string.empty": "Current password cannot be empty",
+    }),
+    newPassword: Joi.string().min(6).max(128).required().messages({
+      "any.required": "New password is required",
+      "string.min": "New password must be at least 6 characters",
+      "string.max": "New password cannot exceed 128 characters",
+    }),
+    confirmNewPassword: Joi.string().required().valid(Joi.ref("newPassword")).messages({
+      "any.only": "Passwords do not match",
+      "any.required": "Confirm new password is required",
+    }),
+  });
 
-    if (!currentPassword || !newPassword || confirmNewPassword === undefined) {
-        res.status(400).json({ message: "Name, lastname, and age are required" });
-        return;
-    }
+  const { error } = schema.validate(req.body, { abortEarly: false });
+  if (error) {
+    res.status(400).json({ message: error.details.map(d => d.message).join(", ") });
+    return;
+  }
 
-    // if (typeof name !== "string" || typeof lastname !== "string") {
-    //     res.status(400).json({ message: "Name and lastname must be strings" });
-    //     return;
-    // }
-
-    // if (typeof age !== "number" || age <= 0) {
-    //     res.status(400).json({ message: "Age must be a positive number" });
-    //     return;
-    // }
-
-    next();
+  next();
 };

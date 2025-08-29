@@ -5,8 +5,6 @@ import { AuthRequest } from "../types/auth";
 import { sendVerificationEmail } from "./notification.controller";
 import bcrypt from "bcrypt";
 
-
-
 export const getUsers = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     if (!req.user?.id || !req.user?.role) {
@@ -154,14 +152,12 @@ export const updatePassword = async (req: AuthRequest, res: Response): Promise<v
       return;
     }
 
-    // Ստուգել հին password-ը
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
       res.status(400).json({ message: "Current password is incorrect" });
       return;
     }
 
-    // Hash անել նոր password-ը
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
 

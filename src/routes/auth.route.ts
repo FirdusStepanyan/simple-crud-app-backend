@@ -1,12 +1,12 @@
 import express from "express";
 import { registration, login, emailverifi } from "../controllers/auth.controller";
-import { validateUser, loginUser, validateverificode } from "../middlewares/validation.middleware";
+import { registerUser, loginUser, validateVerifiCode } from "../middlewares/validation.middleware";
 import { authenticate } from "../middlewares/auth.middleware";
 
 const router = express.Router();
 
-router.post("/registration", validateUser, registration);
+router.post("/registration", registerUser, registration);
 router.post("/login", loginUser, login);
-router.post("/verify",validateverificode, authenticate,  emailverifi);
+router.post("/verify",validateVerifiCode, authenticate,  emailverifi);
 
 export default router;

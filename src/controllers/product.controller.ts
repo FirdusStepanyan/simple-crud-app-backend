@@ -88,8 +88,8 @@ export const getProduct = async (req: any, res: Response): Promise<void> => {
 
 export const createProduct = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const { name, quantity, price } = req.body; // only from body
-        const userId = req.user?.id; // from authenticated user
+        const { name, quantity, price } = req.body;
+        const userId = req.user?.id;
 
         if (!name || !quantity || !price || !userId) {
             res.status(400).json({ message: "All fields are required" });

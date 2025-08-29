@@ -33,7 +33,27 @@ takinnery linumen update profile endpointum
 2) mail sendgrid, registracia lineluc mail gna, text(Wlocome my project, ypur verification code is "5445") +
 3) login exac vichakum, update user enpodintum, toxel vor emailnel update ani, ete taza maila grel noric uxarkel mail ev email verify false sarqel
     update email mail  +
-4) login exac vichakum, update password endpotint
+4) login exac vichakum, update password endpotint   ++
+
+6) validation poxel ogtagorcel express-validation   ++++
+
+
+
+// 08/30
+
+1) global rensponce, aysinqn funkcian veradarcni sirun object, infotmativ
+    orinak, producti get all endpointy chveradarcni miangamic produnctneri infon, 
+
+    return {
+        "message": "success"
+        status_code: 200,
+        data: [
+            prod info
+        ]
+    }
+2) database confignery linen .env filum
+3) sarqel helperner, orinak jwt service, bcript
+4) sarqel servicner, sareql repasitory (poxel nayev goyutyun unecoxneri anunnery, lini hmapatasxan)
+    serviucum lini logikan, isk repasitorium lini databasi callery
 5) taza endpoint upload profile image, ogtagorcelues packijner (path, fs)
-    path(src/uploads/Date now().jpeg)
-6) validation poxel ogtagorcel express-validation
+    path(src/uploads/Date now().jpeg) -----------------------------------------------------------
