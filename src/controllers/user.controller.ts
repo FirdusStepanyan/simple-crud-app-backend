@@ -62,13 +62,25 @@ export const getUser = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-
-
-export const getProfile = async (req: Request, res: Response): Promise<void> => {
+export const getProfile = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    // todo shatunakel
-    // hushum, piti ogtagorcvi login exaci infon
-    res.status(200).json(true);
+    if (!req.user) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    const userRepository = AppDataSource.getRepository(User);
+    const user = await userRepository.findOne({
+      where: { id: req.user.id },
+      relations: ["products"], // եթե պետք ա նաև կապված տվյալները
+    });
+
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    res.status(200).json(user);
   } catch (error: unknown) {
     console.error("Error:", error);
     res.status(500).json({ message: error instanceof Error ? error.message : "Unknown error" });
@@ -76,11 +88,12 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
 };
 
 
+
 export const updateUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const userRepository = AppDataSource.getRepository(User);
     const { id } = req.params;
-    const { name, lastname, age, email} = req.body;
+    const { name, lastname, age, email } = req.body;
 
     const user = await userRepository.findOneBy({ id: Number(id) });
 
@@ -96,7 +109,7 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
     user.name = name;
     user.lastname = lastname;
     user.age = age;
-    user.email=email;
+    user.email = email;
 
     const updatedUser = await userRepository.save(user);
     res.status(200).json(updatedUser);

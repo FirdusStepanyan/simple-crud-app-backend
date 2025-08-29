@@ -25,9 +25,9 @@ taza columna petq u mi hat el dra hamar true u falsi hamara petq column u erb vo
 
 usernerin karan get anen menak adminy
 
-// 29 tasks
-1) get my profile endpotint, SHARUNAKEL
-
+// 08/29 tasks
+1) get my profile endpotint, SHARUNAKEL  +
+ 
 takinnery linumen update profile endpointum
 
 2) mail sendgrid, registracia lineluc mail gna, text(Wlocome my project, ypur verification code is "5445")
