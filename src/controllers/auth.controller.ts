@@ -5,6 +5,52 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { JWTPayloadType } from "../types/JWTPayloadType";
 import { AuthRequest } from "../types/auth";
+import { sendVerificationEmail } from "./notification.controller";
+
+// export const registration = async (req: Request, res: Response): Promise<void> => {
+//   try {
+//     const { name, lastname, age, email, password } = req.body;
+//     const userRepository = AppDataSource.getRepository(UserSchema);
+
+//     const existingUser = await userRepository.findOne({ where: { email } });
+//     if (existingUser) {
+//       res.status(409).json({ message: "Email already registered" });
+//       return;
+//     }
+
+//     const hashedPassword = await bcrypt.hash(password, 10);
+//     const verificationCode = Math.floor(1000 + Math.random() * 9000); // 4 digit code
+
+//     const user = userRepository.create({
+//       name,
+//       lastname,
+//       age,
+//       email,
+//       password: hashedPassword,
+//       email_verifi_code: verificationCode,
+//       is_verified: false,
+//     });
+
+//     const result = await userRepository.save(user);
+
+//     const { password: _, email_verifi_code, ...userWithoutPassword } = result;
+
+//     console.log("Verification code for", email, "=>", verificationCode);
+
+//     res.status(201).json({
+//       message: "User registered. Please verify your email.",
+//       user: userWithoutPassword,
+//     });
+//   } catch (error: unknown) {
+//     console.error("Error:", error);
+//     res.status(500).json({
+//       message: error instanceof Error ? error.message : "Unknown error",
+//     });
+//   }
+// };
+
+
+
 
 export const registration = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -34,8 +80,8 @@ export const registration = async (req: Request, res: Response): Promise<void> =
 
     const { password: _, email_verifi_code, ...userWithoutPassword } = result;
 
-    console.log("Verification code for", email, "=>", verificationCode);
-
+    await sendVerificationEmail(email, verificationCode);
+    
     res.status(201).json({
       message: "User registered. Please verify your email.",
       user: userWithoutPassword,
