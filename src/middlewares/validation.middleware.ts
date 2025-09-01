@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import Joi from "joi";
 
-// -------------------- User validation --------------------
 export const updateUser = (req: Request, res: Response, next: NextFunction): void => {
   const schema = Joi.object({
     name: Joi.string().min(2).max(50).required().messages({
@@ -33,7 +32,6 @@ export const updateUser = (req: Request, res: Response, next: NextFunction): voi
 };
 
 
-// -------------------- User validation --------------------
 export const registerUser = (req: Request, res: Response, next: NextFunction): void => {
   const schema = Joi.object({
     name: Joi.string().min(2).max(50).required().messages({

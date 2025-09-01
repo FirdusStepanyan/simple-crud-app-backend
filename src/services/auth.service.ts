@@ -1,10 +1,10 @@
 import { Response, Request } from "express";
 import AppDataSource from "../database";
 import User from "../models/user.model";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import { sendResponse } from "../utils/response";
 import { AuthRequest } from "../types/auth";
+import { generateToken } from "../helpers/jwt.helper";
+import { hashPassword, comparePassword } from "../helpers/bcrypt.helper";
 import { sendVerificationEmail } from "../controllers/notification.controller";
 
 class AuthService {
@@ -19,14 +19,11 @@ class AuthService {
                 return;
             }
 
-            const hashedPassword = await bcrypt.hash(password, 10);
+            const hashedPassword = await hashPassword(password);
             const verificationCode = Math.floor(1000 + Math.random() * 9000);
 
             const user = userRepository.create({
-                name,
-                lastname,
-                age,
-                email,
+                name, lastname, age, email,
                 password: hashedPassword,
                 email_verifi_code: verificationCode,
                 is_verified: false,
@@ -55,17 +52,13 @@ class AuthService {
                 return;
             }
 
-            const isPasswordValid = await bcrypt.compare(password, user.password);
+            const isPasswordValid = await comparePassword(password, user.password);
             if (!isPasswordValid) {
                 sendResponse(res, null, "Invalid email or password", 401);
                 return;
             }
 
-            const token = jwt.sign(
-                { id: user.id, email: user.email },
-                process.env.JWT_SECRET || "supersecret",
-                { expiresIn: "1h" }
-            );
+            const token = generateToken({ id: user.id, email: user.email });
 
             sendResponse(res, { id: user.id, name: user.name, lastname: user.lastname, token }, "Login successful");
         } catch (error: unknown) {
