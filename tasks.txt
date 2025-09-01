@@ -50,9 +50,9 @@ takinnery linumen update profile endpointum
         data: [
             prod info
         ]
-    }
-2) database confignery linen .env filum
-3) sarqel helperner, orinak jwt service, bcript
+    }           +++++++++++++++
+2) database confignery linen .env filum    +++++++++
+3) sarqel helperner, orinak jwt service, bcript  
 4) sarqel servicner, sareql repasitory (poxel nayev goyutyun unecoxneri anunnery, lini hmapatasxan)
     serviucum lini logikan, isk repasitorium lini databasi callery
 5) taza endpoint upload profile image, ogtagorcelues packijner (path, fs)
