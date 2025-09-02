@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import AppDataSource from "../database";
 import Product from "../models/product.model";
 import User from "../models/user.model";
-import { USER_ROLES } from "../roles";
+import { USER_ROLES } from "../helpers/enums/roles";
 import { sendResponse } from "../utils/response";
 
 interface AuthRequest extends Request {

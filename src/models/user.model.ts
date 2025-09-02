@@ -1,6 +1,6 @@
 import { EntitySchema } from "typeorm";
 import { Product } from "./product.model";
-import { USER_ROLES, UserRole } from "../roles";
+import { USER_ROLES, UserRole } from "../helpers/enums/roles";
 
 export interface User {
   id: number;
@@ -34,6 +34,7 @@ const UserSchema = new EntitySchema<User>({
   relations: {
     products: { type: "one-to-many", target: "Product", inverseSide: "user" },
   },
+  
 });
 
 export default UserSchema;

@@ -1,5 +1,5 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
-import { USER_ROLES } from "../roles";
+import { USER_ROLES } from "../helpers/enums/roles";
 
 export class AddRoleToUser1756306476640o implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {

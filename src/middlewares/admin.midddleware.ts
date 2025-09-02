@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 
-import { USER_ROLES } from "../roles";
+import { USER_ROLES } from "../helpers/enums/roles";
 import { AuthRequest } from "../types/auth";
 
 
