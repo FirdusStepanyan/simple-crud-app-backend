@@ -1,4 +1,3 @@
-// src/migrations/AddRoleToUser1756306476640o.ts
 import { MigrationInterface, QueryRunner } from "typeorm";
 import { USER_ROLES } from "../roles";
 

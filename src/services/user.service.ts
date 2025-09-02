@@ -1,5 +1,7 @@
-import { Response } from "express";
+import fs from "fs";
+import path from "path";
 import bcrypt from "bcrypt";
+import { Response } from "express";
 import { sendResponse } from "../utils/response";
 import { AuthRequest } from "../types/auth";
 import { sendVerificationEmail } from "../controllers/notification.controller";
@@ -97,17 +99,49 @@ class UserService {
     }
   }
 
-  async uplaodProfileImage(req: any, res: any): Promise<any> {
-    let file = req.file;
-    const fullUrl = `http://localhost:3000/uploads/${file.filename}`;
+  async uploadProfileImage(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      if (!req.user) {
+        sendResponse(res, null, "Unauthorized", 401);
+        return;
+      }
 
-    req.user.image = fullUrl;
-    await this.userRepository.save(req.user);
-    return sendResponse(res, {
-      url: fullUrl
-    });
-}
+      if (!req.file) {
+        sendResponse(res, null, "No file uploaded", 400);
+        return;
+      }
 
+      const user = await this.userRepository.findById(req.user.id);
+      if (!user) {
+        sendResponse(res, null, "User not found", 404);
+        return;
+      }
+
+      if (user.image) {
+          const relativePath = user.image.replace("http://localhost:3000/", "");
+        
+        const oldImagePath = path.join(process.cwd(), relativePath);
+        console.log("Deleting old image:", oldImagePath);
+
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlink(oldImagePath, (err) => {
+            if (err) console.error("Failed to delete old image:", err);
+            else console.log("Old image deleted successfully");
+          });
+        }
+      }
+
+
+      const fullUrl = `http://localhost:3000/${req.file.path.replace("\\", "/")}`;
+      user.image = fullUrl;
+
+      await this.userRepository.save(user);
+
+      sendResponse(res, { url: fullUrl }, "Image uploaded successfully");
+    } catch (error: unknown) {
+      sendResponse(res, null, error instanceof Error ? error.message : "Unknown error", 500);
+    }
+  }
 
   async updatePassword(req: AuthRequest, res: Response): Promise<void> {
     try {
@@ -157,6 +191,15 @@ class UserService {
       if (!user) {
         sendResponse(res, null, "User not found", 404);
         return;
+      }
+
+      if (user.image) {
+        const imagePath = path.join(__dirname, "../", user.image.replace("http://localhost:3000/", ""));
+        if (fs.existsSync(imagePath)) {
+          fs.unlink(imagePath, (err) => {
+            if (err) console.error("Failed to delete user image:", err);
+          });
+        }
       }
 
       await this.userRepository.delete(Number(id));
