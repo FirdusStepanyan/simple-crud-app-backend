@@ -13,6 +13,7 @@ export interface User {
   products: Product[];
   email_verifi_code: number | null;
   is_verified: boolean;
+  image?: string; // <-- նկարի path
 }
 
 const UserSchema = new EntitySchema<User>({
@@ -28,6 +29,7 @@ const UserSchema = new EntitySchema<User>({
     role: { type: "enum", enum: USER_ROLES, default: USER_ROLES.USER },
     email_verifi_code: { type: Number, nullable: true },
     is_verified: { type: Boolean, default: false },
+    image: { type: String, nullable: true }, // <-- նկարի path
   },
   relations: {
     products: { type: "one-to-many", target: "Product", inverseSide: "user" },
