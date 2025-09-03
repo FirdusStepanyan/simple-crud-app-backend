@@ -6,20 +6,50 @@ class TimeSlotService {
   private timeSlotRepo = new TimeSlotRepository();
   private userRepo = new UserRepository();
 
+  private async isOverlapping(adminId: number, date: Date | string, startTime: string, endTime: string): Promise<boolean> {
+    const slots: TimeSlot[] = await this.timeSlotRepo.findAll();
+
+    const dateObj = typeof date === "string" ? new Date(date) : date;
+
+    const adminSlots = slots.filter(
+      s => s.user.id === adminId && new Date(s.date).toDateString() === dateObj.toDateString()
+    );
+
+    for (const slot of adminSlots) {
+      const slotStart = slot.start_time;
+      const slotEnd = slot.end_time;
+
+      if (
+        (startTime >= slotStart && startTime < slotEnd) ||
+        (endTime > slotStart && endTime <= slotEnd) ||
+        (startTime <= slotStart && endTime >= slotEnd)
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+}
+
   async createTimeSlot(adminId: number, data: Partial<TimeSlot>) {
     const admin = await this.userRepo.findById(adminId);
     if (!admin) throw new Error("Admin not found");
 
-    const slot = {
+    if (!data.date || !data.start_time || !data.end_time) {
+      throw new Error("Date, start_time and end_time are required");
+    }
+
+    if (await this.isOverlapping(adminId, data.date, data.start_time, data.end_time)) {
+      throw new Error("This time slot overlaps with an existing one for this admin.");
+    }
+
+    const slot: TimeSlot = {
       ...data,
       user: admin,
-      priceType: data.price_type || PriceType.SUBTOTAL,
-    } as unknown as TimeSlot;
+      price_type: data.price_type || PriceType.SUBTOTAL,
+    } as TimeSlot;
 
-
-    let ssss = await this.timeSlotRepo.save(slot);
-
-    return ssss
+    return this.timeSlotRepo.save(slot);
   }
 
   async getAllTimeSlots() {
@@ -37,6 +67,13 @@ class TimeSlotService {
     if (!slot) throw new Error("Time slot not found");
 
     Object.assign(slot, data);
+
+    if (data.date && data.start_time && data.end_time) {
+      const adminId = slot.user.id;
+      if (await this.isOverlapping(adminId, data.date, data.start_time, data.end_time)) {
+        throw new Error("Updated time slot overlaps with existing slot for this admin.");
+      }
+    }
 
     return this.timeSlotRepo.save(slot);
   }

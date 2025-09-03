@@ -1,4 +1,4 @@
-import { EntitySchema } from "typeorm";
+import { EntitySchema, NumericType } from "typeorm";
 import UserSchema, { User } from "./user.model";
 
 export enum PriceType {
@@ -15,6 +15,11 @@ export interface TimeSlot {
   price: number;
   price_type: PriceType;
   user: User;
+  location: string;
+  cuisine: string;
+  tax: NumericType;
+  min_book_count: number;
+  max_book_count: number;
 }
 
 const TimeSlotSchema = new EntitySchema<TimeSlot>({
@@ -28,13 +33,21 @@ const TimeSlotSchema = new EntitySchema<TimeSlot>({
     end_time: { type: String },
     price: { type: Number },
     price_type: { type: "enum", enum: PriceType, default: PriceType.SUBTOTAL },
+    location: { type: String },
+    cuisine: { type: String },
+    tax: { type: Number},
+    min_book_count: { type: Number},
+    max_book_count: { type: Number},
   },
   relations: {
     user: {
-      type: "many-to-one", target: () => "User", joinColumn: { name: "user_id" },
-      nullable: false
+      type: "many-to-one",
+      target: () => "User",
+      joinColumn: { name: "user_id" },
+      nullable: false,
     },
   },
+
 });
 
 export default TimeSlotSchema;
