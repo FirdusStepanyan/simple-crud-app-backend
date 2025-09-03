@@ -2,28 +2,30 @@ import AppDataSource from "../database";
 import TimeSlotSchema, { TimeSlot } from "../models/timeSlot.model";
 
 export class TimeSlotRepository {
+  findAll(): TimeSlot[] | PromiseLike<TimeSlot[]> {
+    return this.repo.find({ relations: ["user"] });
+  }
   private repo = AppDataSource.getRepository<TimeSlot>(TimeSlotSchema);
 
-  async findAll() {
-    return this.repo.find({ relations: ["user"] });
+  async findAllWithAdmins(skip: number, take: number): Promise<[TimeSlot[], number]> {
+    return this.repo.findAndCount({
+      relations: ["user"],
+      where: { user: { role: "ADMIN" } },
+      skip,
+      take,
+      order: { date: "ASC", start_time: "ASC" },
+    });
+  }
+
+  async save(slot: TimeSlot) {
+    return this.repo.save(slot);
   }
 
   async findById(id: number) {
     return this.repo.findOne({ where: { id }, relations: ["user"] });
   }
 
-  async save(timeSlot: TimeSlot) {
-    return this.repo.save(timeSlot);
-  }
-
   async delete(id: number) {
     return this.repo.delete(id);
   }
-
-  async update(id: number, data: Partial<TimeSlot>) {
-    await this.repo.update(id, data);
-    return this.findById(id);
-  }
 }
-
-export default new TimeSlotRepository();

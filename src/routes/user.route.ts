@@ -4,8 +4,8 @@ import path from "path";
 import { authenticate } from "../middlewares/auth.middleware";
 import { adminMiddleware } from "../middlewares/admin.midddleware";
 import { validateUpdatePassword, updateUser } from "../middlewares/validation.middleware";
-import { 
-  getUsers, getUser, getProfile, updateProfile, updatePassword, uploadProfileImage, deleteUser
+import {
+  getUsers, getUser, getProfile, getAllAdminTimeSlots, updateProfile, updatePassword, uploadProfileImage, deleteUser
 } from "../controllers/user.controller";
 
 const router = express.Router();
@@ -17,12 +17,13 @@ const storage = multer.diskStorage({
     cb(null, uniqueSuffix + path.extname(file.originalname));
   },
 });
-
 const upload = multer({ storage });
 
 router.get("/profile", authenticate, getProfile);
 router.get("/", authenticate, adminMiddleware, getUsers);
 router.get("/:id", authenticate, adminMiddleware, getUser);
+router.get("/admin-slots/all", authenticate, getAllAdminTimeSlots);
+
 router.put("/profile", authenticate, updateUser, updateProfile);
 router.put("/update-password", authenticate, validateUpdatePassword, updatePassword);
 router.delete("/:id", authenticate, adminMiddleware, deleteUser);
