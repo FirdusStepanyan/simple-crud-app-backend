@@ -1,7 +1,6 @@
 import { UserRepository } from "../repositories/user.repositori";
 import { TimeSlotRepository } from "../repositories/timeSlot.repositori";
 import { TimeSlot, PriceType } from "../models/timeSlot.model";
-import { User } from "../models/user.model";
 
 class TimeSlotService {
   private timeSlotRepo = new TimeSlotRepository();
@@ -11,13 +10,16 @@ class TimeSlotService {
     const admin = await this.userRepo.findById(adminId);
     if (!admin) throw new Error("Admin not found");
 
-    const slot: TimeSlot = {
+    const slot = {
       ...data,
       user: admin,
-      priceType: data.priceType || PriceType.SUBTOTAL,
-    } as TimeSlot;
+      priceType: data.price_type || PriceType.SUBTOTAL,
+    } as unknown as TimeSlot;
 
-    return this.timeSlotRepo.save(slot);
+
+    let ssss = await this.timeSlotRepo.save(slot);
+
+    return ssss
   }
 
   async getAllTimeSlots() {
@@ -30,14 +32,19 @@ class TimeSlotService {
     return slot;
   }
 
+  async updateTimeSlot(id: number, data: Partial<TimeSlot>) {
+    const slot = await this.timeSlotRepo.findById(id);
+    if (!slot) throw new Error("Time slot not found");
 
+    Object.assign(slot, data);
 
+    return this.timeSlotRepo.save(slot);
+  }
 
-
-  //////////////ավելացնել update
   async deleteTimeSlot(id: number) {
     const slot = await this.timeSlotRepo.findById(id);
     if (!slot) throw new Error("Time slot not found");
+
     await this.timeSlotRepo.delete(id);
     return { message: "Time slot deleted successfully" };
   }

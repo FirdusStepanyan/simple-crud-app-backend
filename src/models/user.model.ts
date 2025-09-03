@@ -1,5 +1,6 @@
 import { EntitySchema } from "typeorm";
-import { Product } from "./product.model";
+import ProductSchema, { Product } from "./product.model";
+import TimeSlotSchema, { TimeSlot } from "./timeSlot.model";
 import { USER_ROLES, UserRole } from "../helpers/enums/roles";
 
 export interface User {
@@ -11,6 +12,7 @@ export interface User {
   password: string;
   role: UserRole;
   products: Product[];
+  timeSlots?: TimeSlot[];
   email_verifi_code: number | null;
   is_verified: boolean;
   image?: string;
@@ -32,9 +34,17 @@ const UserSchema = new EntitySchema<User>({
     image: { type: String, nullable: true },
   },
   relations: {
-    products: { type: "one-to-many", target: "Product", inverseSide: "user" },
+    products: {
+      type: "one-to-many",
+      target: () => "Product",
+      inverseSide: "user",
+    },
+    timeSlots: {
+      type: "one-to-many",
+      target: () => "TimeSlot",
+      inverseSide: "user",
+    },
   },
-  
 });
 
 export default UserSchema;

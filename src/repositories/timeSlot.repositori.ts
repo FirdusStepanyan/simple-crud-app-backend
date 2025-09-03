@@ -19,6 +19,11 @@ export class TimeSlotRepository {
   async delete(id: number) {
     return this.repo.delete(id);
   }
+
+  async update(id: number, data: Partial<TimeSlot>) {
+    await this.repo.update(id, data);
+    return this.findById(id);
+  }
 }
 
 export default new TimeSlotRepository();

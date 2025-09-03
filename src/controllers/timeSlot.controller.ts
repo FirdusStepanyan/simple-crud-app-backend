@@ -31,6 +31,15 @@ class TimeSlotController {
     }
   }
 
+  async update(req: Request, res: Response) {
+    try {
+      const slot = await timeSlotService.updateTimeSlot(Number(req.params.id), req.body);
+      sendResponse(res, slot, "Time slot updated successfully");
+    } catch (error: unknown) {
+      sendResponse(res, null, error instanceof Error ? error.message : "Unknown error", 500);
+    }
+  }
+
   async delete(req: Request, res: Response) {
     try {
       const result = await timeSlotService.deleteTimeSlot(Number(req.params.id));

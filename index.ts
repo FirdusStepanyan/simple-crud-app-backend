@@ -3,6 +3,7 @@ import AppDataSource from "./src/database";
 import productRoute from "./src/routes/product.route";
 import userRoute from "./src/routes/user.route";
 import authRoute from "./src/routes/auth.route";
+import timeSlotRoute from "./src/routes/timeSlot.route";
 import path from "path";
 
 const app = express();
@@ -11,10 +12,10 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use("/uploads", express.static(path.join(__dirname, "src/uploads")));
 
-
 app.use("/api/products", productRoute);
 app.use("/api/users", userRoute);
 app.use("/api/auth", authRoute);
+app.use("/api/slots", timeSlotRoute);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("hello");
