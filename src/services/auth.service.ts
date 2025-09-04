@@ -1,7 +1,7 @@
 import { Response, Request } from "express";
 import AppDataSource from "../database";
 import User from "../models/user.model";
-import { sendResponse } from "../utils/response";
+import { sendResponse } from "../helpers/utils/response";
 import { AuthRequest } from "../types/auth";
 import { generateToken } from "../helpers/jwt.helper";
 import { hashPassword, comparePassword } from "../helpers/bcrypt.helper";

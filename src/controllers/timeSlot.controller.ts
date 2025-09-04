@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { sendResponse } from "../utils/response";
+import { sendResponse } from "../helpers/utils/response";
 import timeSlotService from "../services/timeSlot.service";
 
 class TimeSlotController {

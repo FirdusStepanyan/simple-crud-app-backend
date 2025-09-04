@@ -3,7 +3,7 @@ import { Response } from "express";
 import fs from "fs";
 import path from "path";
 import bcrypt from "bcrypt";
-import { sendResponse } from "../utils/response";
+import { sendResponse } from "../helpers/utils/response";
 import { sendVerificationEmail } from "../controllers/notification.controller";
 import { UserRepository } from "../repositories/user.repositori";
 import { TimeSlotRepository } from "../repositories/timeSlot.repositori";
