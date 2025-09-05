@@ -2,12 +2,14 @@ import { Booking } from "../models/book.model";
 import { BookingRepository } from "../repositories/booking.repositori";
 import AppDataSource from "../database";
 import UserSchema from "../models/user.model";
-import TimeSlotSchema from "../models/timeSlot.model";
+// import TimeSlotSchema from "../models/timeSlot.model";
 import PDFDocument from "pdfkit";
 import fs from "fs";
 import path from "path";
 import { sendBookmail } from "../controllers/notification.controller";
 import { calculateBookPrice } from "../helpers/utils/booking.helper";
+import TimeSlotSchema, { TimeSlot } from "../models/timeSlot.model";
+
 //import { sendVerificationEmail } from "./mailer";
 
 export class BookingService {
@@ -76,9 +78,39 @@ export class BookingService {
     return this.bookingRepo.findById(id);
   }
 
-  async updateBooking(id: number, data: Partial<Booking>): Promise<Booking | null> {
+  async updateBooking(id: number, data: Partial<Booking & TimeSlot>): Promise<Booking | null> {
+  const booking = await this.bookingRepo.findById(id);
+  if (!booking) throw new Error("Booking not found");
+
+  const slotRepo = AppDataSource.getRepository(TimeSlotSchema);
+
+  // Եթե user booking արդեն կա
+  if (booking.user) {
+    const allowedSlotFields: (keyof TimeSlot)[] = ["location", "name", "tax", "cuisine"];
+
+    const filteredSlotData: Partial<TimeSlot> = {};
+    for (const key of allowedSlotFields) {
+      if ((data as any)[key] !== undefined) {
+        (filteredSlotData as any)[key] = (data as any)[key];
+      }
+    }
+
+    // Update միայն slot-ի դաշտերը
+    if (Object.keys(filteredSlotData).length > 0) {
+      await slotRepo.update(booking.time_slot_id.id, filteredSlotData);
+    }
+
+    return this.bookingRepo.findById(id);
+  } else {
+    // Եթե booking չկա, admin-ը կարող է update անել ամբողջ Booking + Slot
+    if (data.time_slot_id) {
+      await slotRepo.update(booking.time_slot_id.id, data.time_slot_id as any);
+    }
     return this.bookingRepo.updateBooking(id, data);
   }
+}
+
+
 
   async deleteBooking(id: number): Promise<Booking | null> {
     return this.bookingRepo.deleteBooking(id);
